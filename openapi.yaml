@@ -1,0 +1,108 @@
+openapi: 3.0.0
+info:
+  title: Common Kong API
+  description: kong api
+  version: 0.0.1
+
+servers:
+  - url: http://127.0.0.1:8001
+    description: Beta Environment
+
+
+components:
+  schemas:
+    Service:
+      type: object
+      properties:
+        name:
+          type: string
+          example: demo
+        retries:
+          type: integer
+          default: 5
+          example: 5
+        protocol:
+          type: string
+          enum: [grpc, grpcs, http, https, tcp, tls]
+          default: http
+        host:
+          type: string
+          example: hello
+        port: 
+          type: integer
+          default: 80
+          example: 80
+        path:
+          type: string
+          example: '/'
+        connect_timeout:
+          type: integer
+          default: 60000
+          example: 60000
+        write_timeout:
+          type: integer
+          default: 60000
+          example: 60000
+        read_timeout:
+          type: integer
+          default: 60000
+          example: 60000
+        tags:
+          type: array
+          example: []
+        client_certificate:
+           type: string
+           nullable: true
+           default: ''
+           example:
+        tls_verify:
+          type: boolean
+          nullable: true
+          default: false
+          example: 
+        tls_verify_depth:
+          type: integer
+          nullable: true
+          default: null
+          example: 
+        ca_certificates:
+          type: string
+          nullable: true
+          default: 'null'
+          example: 
+        url:
+          type: string
+          nullable: true
+          default: 'null'
+          example: 
+      required:
+        - protocol
+        - host
+        - port
+        - url
+  
+
+paths:
+  /services:
+    get:
+      summary: return list of services
+      responses:
+        '200':
+          description: A JSON array of services
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: 
+                  type: string
+    post:
+      summary: create new service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '201':
+          description: Create new service success

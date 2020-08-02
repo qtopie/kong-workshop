@@ -1,0 +1,66 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'application'
+
+id "com.diffplug.spotless" version "5.1.0"
+}
+
+repositories {
+    jcenter()
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    implementation 'com.google.guava:guava:28.0-jre'
+    // For java11, you may use internal http client
+    implementation("com.squareup.okhttp3:okhttp:4.8.0")
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+application {
+    mainClassName = 'com.example.demo.App'
+}
+
+eclipse {
+project.natures 'org.eclipse.buildship.core.gradleprojectnature'
+
+  classpath {
+		downloadJavadoc = true
+		downloadSources = true
+
+defaultOutputDir = file('build/default')
+        def map = [
+          'src/main/java' : 'build/classes/java/main',
+          'src/main/resources': 'build/resources/main',
+          'src/test/java': 'build/classes/java/test',
+          'src/test/resources': 'build/resources/test'
+        ]
+
+file.whenMerged {
+			entries.each { source ->
+				if (source.kind == 'src' && source.hasProperty('output')) {
+					source.output = map.get(source.path) ?: defaultOutputDir
+				}
+			}
+		}
+
+}
+}
+
+
+spotless {
+java {
+  googleJavaFormat('1.6')
+}
+
+  groovyGradle {                                                                                                                                                             
+    target '*.gradle' // default target of groovyGradle
+    greclipse()
+  }
+}
+build.dependsOn spotlessApply

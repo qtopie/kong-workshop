@@ -5,6 +5,7 @@
 ## Setup Locally
 
 ```bash
+git submodule update --init
 cd plugins/go-pluginserver && make && cd -
 cd plugins/go && make && cd
 

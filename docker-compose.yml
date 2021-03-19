@@ -2,7 +2,7 @@ version: '3'
 
 services:
   kong:
-    image: kong:2.1
+    image: kong:2.3-ubuntu
     container_name: kong
     depends_on:
       - postgres
@@ -16,18 +16,22 @@ services:
     environment:
       - "KONG_DATABASE=postgres" 
       - "KONG_PG_HOST=kong-database" 
-      - "KONG_PG_PASSWORD=kong"
+      - 'KONG_PG_PASSWORD=kong$abc'
       - "KONG_CASSANDRA_CONTACT_POINTS=kong-database" 
       - "KONG_PROXY_ACCESS_LOG=/dev/stdout" 
       - "KONG_ADMIN_ACCESS_LOG=/dev/stdout" 
       - "KONG_PROXY_ERROR_LOG=/dev/stderr" 
       - "KONG_ADMIN_ERROR_LOG=/dev/stderr" 
       - "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" 
+    volumes:
+      - "./conf/kong.conf:/etc/kong/kong.conf:ro"
+      - "./plugins/go-pluginserver/go-pluginserver:/usr/local/bin/go-pluginserver"
+      - "./plugins/go:/usr/local/kong/go-plugins"
 
   kong-migrations:
-    image: kong:2.1
+    image: kong:2.3-ubuntu
     container_name: kong-migrations
-    command: "kong migrations bootstrap"
+    command: "kong migrations bootstrap && kong migrations up"
     depends_on:
       - postgres
     networks:
@@ -35,7 +39,7 @@ services:
     environment:
       - "KONG_DATABASE=postgres" 
       - "KONG_PG_HOST=kong-database" 
-      - "KONG_PG_PASSWORD=kong"
+      - 'KONG_PG_PASSWORD=kong$abc'
       - "KONG_PG_PORT=5432"
 
   postgres:
@@ -47,23 +51,11 @@ services:
       - 5432:5432
     environment:
       - "POSTGRES_USER=kong"
-      - "POSTGRES_PASSWORD=kong"
+      - "POSTGRES_PASSWORD=kong$abc"
       - "POSTGRES_DB=kong"
-
-  konga:
-    image: pantsel/konga:latest
-    container_name: konga
-    depends_on:
-      - kong
-    networks:
-      - kong-net
-    ports:
-      - 1337:1337
-    environment:
-      - "NODE_ENV=production"
-      - "TOKEN_SECRET="
-
 
 networks:
   kong-net:
-    
+    ipam:
+      config:
+        - subnet: 172.12.42.0/24

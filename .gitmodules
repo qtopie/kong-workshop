@@ -1,0 +1,6 @@
+[submodule "plugins/go-pluginserver"]
+	path = plugins/go-pluginserver
+	url = https://github.com/Kong/go-pluginserver.git
+[submodule "plugins/go"]
+	path = plugins/go
+	url = https://github.com/Kong/go-plugins.git

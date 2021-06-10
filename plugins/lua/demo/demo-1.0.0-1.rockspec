@@ -15,7 +15,7 @@ description = {
 dependencies = {
  -- "lua-resty-counter >= 0.2.0",
   --"kong >= 0.13.0",
- "lua-resty-http == 0.15.0"
+ --"lua-resty-http == 0.15.0"
 }
 
 build = {

@@ -60,8 +60,9 @@ local plugin = {
   
   -- runs in the 'access_by_lua_block'
   function plugin:access(plugin_conf)
-  
-    -- your custom code here
+    kong.service.request.set_header("Accept-Encoding", "identity")
+    --kong.service.request.enable_buffering() 
+     --[[your custom code here
     kong.log.inspect(plugin_conf)   -- check the logs for a pretty-printed config!
     ngx.req.set_header(plugin_conf.request_header, "this is on a request")
 
@@ -106,8 +107,8 @@ local plugin = {
       end
 
       ngx.say(res.body)
-  
-  end --]]
+      --]]
+  end 
   
   
   -- runs in the 'header_filter_by_lua_block'
@@ -115,15 +116,31 @@ local plugin = {
   
     -- your custom code here, for example;
     ngx.header[plugin_conf.response_header] = "this is on the response"
-  
+    kong.response.clear_header("Content-Length") 
   end --]]
   
   
-  --[[ runs in the 'body_filter_by_lua_block'
+  -- runs in the 'body_filter_by_lua_block'
   function plugin:body_filter(plugin_conf)
     -- your custom code here
     kong.log.debug("saying hi from the 'body_filter' handler")
-  end --]]
+
+    local ctx = ngx.ctx
+    local chunk, eof = ngx.arg[1], ngx.arg[2]
+
+    ctx.rt_body_chunks = ctx.rt_body_chunks or {}
+    ctx.rt_body_chunk_number = ctx.rt_body_chunk_number or 1
+
+    if eof then
+      local chunks = table.concat(ctx.rt_body_chunks)
+      --local body = kong.service.response.get_raw_body()
+      ngx.arg[1] = '{"code":"0","msg":"ok","data":'..chunks..'}'
+    else
+      ctx.rt_body_chunks[ctx.rt_body_chunk_number] = chunk
+      ctx.rt_body_chunk_number = ctx.rt_body_chunk_number + 1
+      ngx.arg[1] = nil
+    end
+  end --
   
   
   --[[ runs in the 'log_by_lua_block'

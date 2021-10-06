@@ -1,6 +1,6 @@
 # kong-workshop
 
-*Workshop for playing or develop with kong locally.*
+*Workshop for playing or developing kong locally.*
 
 ## Setup Locally
 
@@ -11,6 +11,7 @@ cd plugins/go && make && cd
 
 docker-compose up
 ```
+
 
 ## Testing
 
@@ -41,5 +42,5 @@ curl -v http://127.0.0.1:8000/ping
 - [kong image](https://hub.docker.com/_/kong)
 - [konga](https://github.com/pantsel/konga#running-konga)
 - [KONG Admin API](https://docs.konghq.com/2.1.x/admin-api/#consumer-object)
-- [go plugins](https://docs.konghq.com/2.0.x/go/)
+- [go plugins](https://docs.konghq.com/2.2.x/go/)
 

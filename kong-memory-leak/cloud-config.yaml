@@ -1,0 +1,28 @@
+users:
+  # set kong as default user
+  - name: kong
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    passwd: kong
+    groups: stapsys, stapusr, staprun
+    shell: /bin/bash
+
+apt:
+  sources:
+      kong.list:
+        source: "deb [trusted=yes] https://download.konghq.com/gateway-2.x-ubuntu-bionic/ default all"
+      #openresty.list:
+        #source: "deb [trusted=yes] http://openresty.org/package/ubuntu bionic main"
+
+package_update: true 
+
+packages:
+  - [kong, 2.2.2] 
+  - systemtap
+#  - [openresty-dbgsym, 1.17.8.2-1~bionic1]
+
+bootcmd:
+  - [ cloud-init-per, once, set-up-stapxx, git, clone, "https://github.com/openresty/stapxx.git", "/usr/local/stapxx"]
+  - [ cloud-init-per, once, set-up-toolkit, git, clone, "https://github.com/openresty/openresty-systemtap-toolkit.git", "/usr/local/openresty-systemtap-toolkit"]
+#  - [ cloud-init-per, once, set-up-toolkit, echo, "export PATH=$PATH:/usr/local/stapxx:/usr/local/openresty-systemtap-toolkit", ">>", "/home/kong/.bashrc"]
+

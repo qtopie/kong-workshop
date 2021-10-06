@@ -1,0 +1,1 @@
+curl 'http://192.168.50.239:8001/services/cb11548c-8374-462d-8b54-1544caad45f5'   -X 'PUT'   -H 'Content-Type: application/json;charset=UTF-8'   -d '{"host":"test"}'

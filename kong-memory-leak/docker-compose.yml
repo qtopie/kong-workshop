@@ -1,0 +1,88 @@
+version: '3.7'
+services:
+  kong-cp:
+    image: kong:2.2.2-ubuntu
+    container_name: kong_cp
+    depends_on:
+      - postgres
+    networks:
+      - kong-net
+    ports:
+      - 8001:8001
+      - 8444:8444
+      - 8005:8005
+    environment:
+      - "KONG_ROLE=control_plane"
+      - "KONG_DATABASE=postgres" 
+      - "KONG_PG_HOST=kong-database" 
+      - 'KONG_PG_PASSWORD=kong'
+      - "KONG_CASSANDRA_CONTACT_POINTS=kong-database" 
+      - "KONG_ADMIN_ACCESS_LOG=/dev/stdout" 
+      - "KONG_ADMIN_ERROR_LOG=/dev/stderr" 
+      - "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" 
+      - "KONG_CLUSTER_LISTEN=0.0.0.0:8005"
+    volumes:
+      - "$HOME/.luarocks:/home/kong/.luarocks:ro"
+      - "./certs:/usr/local/kong/certs:ro"
+      - "./kong.conf:/etc/kong/kong.conf:ro"
+  kong-dp:
+    image: kong:2.2.2-ubuntu
+    container_name: kong_dp
+    depends_on:
+      - postgres
+    networks:
+      - kong-net
+    ports:
+      - 8000:8000
+      - 8443:8443
+    environment:
+      - "KONG_ROLE=data_plane"
+      - "KONG_DATABASE=off" 
+      - "KONG_PROXY_ACCESS_LOG=/dev/stdout" 
+      - "KONG_PROXY_ERROR_LOG=/dev/stderr" 
+      - "KONG_CLUSTER_CONTROL_PLANE=kong-cp:8005"
+    volumes:
+      - "$HOME/.luarocks:/home/kong/.luarocks:ro"
+      - "./kong.conf:/etc/kong/kong.conf:ro"
+      - "./certs:/usr/local/kong/certs:ro"
+
+  kong-hybrid-gencert:
+    image: kong:2.2.2-ubuntu
+    container_name: kong-hybrid-gencert
+    command: "kong hybrid gen_cert /home/kong/cluster.crt /home/kong/cluster.key"
+    volumes:
+      - "$PWD/certs:/home/kong"
+  kong-migrations:
+    image: kong:2.2.2-ubuntu
+    container_name: kong-migrations
+    command: "kong migrations bootstrap && kong migrations up"
+    depends_on:
+      - postgres
+    networks:
+      - kong-net
+    environment:
+      - "KONG_DATABASE=postgres" 
+      - "KONG_PG_HOST=kong-database" 
+      - 'KONG_PG_PASSWORD=kong'
+      - "KONG_PG_PORT=5432"
+
+  postgres:
+    image: postgres:11
+    container_name: kong-database
+    command: "postgres -c 'config_file=/etc/postgresql/postgresql.conf'"
+    networks:
+      - kong-net
+    ports:
+      - 5432:5432
+    environment:
+      - "POSTGRES_USER=kong"
+      - "POSTGRES_PASSWORD=kong"
+      - "POSTGRES_DB=kong"
+    volumes:
+      - "./postgres.conf:/etc/postgresql/postgresql.conf"
+
+networks:
+  kong-net:
+    ipam:
+      config:
+        - subnet: 172.12.42.0/24

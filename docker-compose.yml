@@ -1,8 +1,8 @@
-version: '3'
+version: '3.7'
 
 services:
   kong:
-    image: kong:2.3-ubuntu
+    image: kong:2.3.1-ubuntu
     container_name: kong
     depends_on:
       - postgres
@@ -30,7 +30,7 @@ services:
       - "./plugins/go:/usr/local/kong/go-plugins"
 
   kong-migrations:
-    image: kong:2.3-ubuntu
+    image: kong:2.3.1-ubuntu
     container_name: kong-migrations
     command: "kong migrations bootstrap && kong migrations up"
     depends_on:
